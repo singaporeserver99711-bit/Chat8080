@@ -6,7 +6,7 @@ import io
 # 1. Page Configuration
 st.set_page_config(page_title="Pro Python Chat", page_icon="💬", layout="wide")
 
-ADMIN_PASSWORD = "superadmin"   # Secret password to clear the entire chat
+ADMIN_PASSWORD = "1234$#@!1234$#@!"   # Secret password to clear the entire chat
 MAX_MESSAGES = 50               # Automatically deletes oldest messages to save RAM
 HEARTBEAT_TIMEOUT = 60          # Seconds before an inactive user is considered offline
 
@@ -51,7 +51,7 @@ if not st.session_state.username:
     
     # Let them pick a cool avatar emoji
     emoji_choice = st.selectbox("Choose your profile avatar:", 
-        ["👤", "🦊", "🦁", "🐉", "🤖", "👽", "🥷", "🧙", "🍕", "🎈", "🚀", "⚡"]
+        ["👤", "🙍‍♂️", "🙎‍♀️", "🧑‍🦰", "🤖", "👱", "🥷", "🧙", "💫", "😎", "🚀", "⚡"]
     )
     username_input = st.text_input("Enter your nickname to join:")
     
@@ -100,7 +100,7 @@ else:
                     st.error("Invalid Admin Pass!")
 
     # Main Chat Interface
-    st.title("💬 Global Real-Time Chat")
+    st.title("💬 Real-Time Chat")
     
     # Display Existing Messages
     chat_container = st.container(height=380)
