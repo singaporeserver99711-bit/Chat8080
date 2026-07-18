@@ -10,6 +10,28 @@ ADMIN_PASSWORD = "1234$#@!1234$#@!"   # Secret password to clear the entire chat
 MAX_MESSAGES = 50               # Automatically deletes oldest messages to save RAM
 HEARTBEAT_TIMEOUT = 60          # Seconds before an inactive user is considered offline
 
+# Global CSS Injection to collapse excessive Streamlit component gaps
+st.markdown("""
+    <style>
+    /* Shrink gaps between columns and layout containers */
+    div[data-testid="stHorizontalBlock"] {
+        gap: 6px !important;
+    }
+    .stElementContainer {
+        margin-bottom: 0px !important;
+    }
+    /* Style the tiny reaction badges */
+    div.stButton > button {
+        padding: 0px 6px !important;
+        font-size: 11px !important;
+        min-height: 20px !important;
+        height: 20px !important;
+        border-radius: 12px !important;
+        margin-top: -8px !important; /* Pulls buttons directly upwards up under the text */
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 # 2. Setup Global/Shared Store using Streamlit's Cache
 @st.cache_resource
 def get_global_data():
@@ -105,9 +127,8 @@ else:
         if not global_data["messages"]:
             st.write("_No messages yet. Say hello!_")
         
-        # Loop through messages with their numerical index to generate distinct reaction button IDs
         for msg_idx, msg in enumerate(global_data["messages"]):
-            # SAFEGUARD: If this is an old message from before the update, give it empty reactions dynamically!
+            # SAFEGUARD: If this is an old message, add reactions dictionary structure dynamically
             if "reactions" not in msg:
                 msg["reactions"] = {"👍": [], "❤️": [], "😂": []}
 
@@ -120,27 +141,11 @@ else:
                 st.write(header)
                 st.image(msg["image"], width=250)
                 
-            # --- COMPACT REACTION ROW (Custom Styled) ---
+            # --- SUPER COMPACT REACTION ROW ---
             current_user = st.session_state.username
             
-                        # This CSS forces the buttons to sit tightly together instead of spreading out
-            st.markdown("""
-                <style>
-                div[data-testid="stHorizontalBlock"] {
-                    gap: 5px !important;
-                }
-                div.stButton > button {
-                    padding: 2px 8px !important;
-                    font-size: 12px !important;
-                    min-height: 25px !important;
-                    height: 25px !important;
-                }
-                </style>
-            """, unsafe_allow_html=True)  # <-- FIXED THIS PARAMETER NAME HERE
-
-            
-            # We create a tight row of columns so they cluster tightly on the left under the avatar text
-            react_cols = st.columns([0.4, 0.4, 0.4, 6])
+            # Creating micro columns that tightly pack buttons right on the left margin
+            react_cols = st.columns([0.06, 0.06, 0.06, 0.82])
             
             # Button 1: Thumbs Up
             t_count = len(msg["reactions"]["👍"])
@@ -168,8 +173,9 @@ else:
                 else:
                     msg["reactions"]["😂"].append(current_user)
                 st.rerun()
-                
-            st.write("") # Clean separation spacing between entries
+            
+            # Small structural divider line between individual chat bubbles
+            st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
     # Layout with permanent visible prompt labels
     with st.form("message_form", clear_on_submit=True):
