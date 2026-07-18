@@ -1,4 +1,4 @@
-import streamlit as st
+        import streamlit as st
 import datetime
 from PIL import Image
 import io
@@ -104,7 +104,9 @@ else:
     with chat_container:
         if not global_data["messages"]:
             st.write("_No messages yet. Say hello!_")
-        for msg in global_data["messages"]:
+        
+        # Loop through messages with their numerical index to generate distinct reaction button IDs
+        for msg_idx, msg in enumerate(global_data["messages"]):
             time_str = msg["time"].strftime("%I:%M %p")
             header = f"**[{time_str}] {msg['emoji']} {msg['user']}:**"
             
@@ -113,6 +115,39 @@ else:
             if msg["image"]:
                 st.write(header)
                 st.image(msg["image"], width=250)
+                
+            # --- INTERACTIVE REACTION BUTTON ROW ---
+            current_user = st.session_state.username
+            react_cols = st.columns([1, 1, 1, 7])
+            
+            # Button 1: Thumbs Up
+            t_count = len(msg["reactions"]["👍"])
+            if react_cols[0].button(f"👍 {t_count if t_count > 0 else ''}", key=f"t_{msg_idx}"):
+                if current_user in msg["reactions"]["👍"]:
+                    msg["reactions"]["👍"].remove(current_user)
+                else:
+                    msg["reactions"]["👍"].append(current_user)
+                st.rerun()
+                
+            # Button 2: Heart
+            h_count = len(msg["reactions"]["❤️"])
+            if react_cols[1].button(f"❤️ {h_count if h_count > 0 else ''}", key=f"h_{msg_idx}"):
+                if current_user in msg["reactions"]["❤️"]:
+                    msg["reactions"]["❤️"].remove(current_user)
+                else:
+                    msg["reactions"]["❤️"].append(current_user)
+                st.rerun()
+                
+            # Button 3: Laughing
+            l_count = len(msg["reactions"]["😂"])
+            if react_cols[2].button(f"😂 {l_count if l_count > 0 else ''}", key=f"l_{msg_idx}"):
+                if current_user in msg["reactions"]["😂"]:
+                    msg["reactions"]["😂"].remove(current_user)
+                else:
+                    msg["reactions"]["😂"].append(current_user)
+                st.rerun()
+                
+            st.write("") # Clean separation spacing between entries
 
     # Re-arranged Layout with permanent visible prompt labels
     with st.form("message_form", clear_on_submit=True):
@@ -145,7 +180,8 @@ else:
                 "emoji": st.session_state.user_emoji,
                 "text": user_input,
                 "image": compressed_img_bytes,
-                "time": ist_time
+                "time": ist_time,
+                "reactions": {"👍": [], "❤️": [], "😂": []} # Inits structural empty state dict trackers
             })
             
             if len(global_data["messages"]) > MAX_MESSAGES:
@@ -155,4 +191,3 @@ else:
 
     if st.button("🔄 Refresh Messages"):
         st.rerun()
-
