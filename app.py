@@ -10,28 +10,6 @@ ADMIN_PASSWORD = "1234$#@!1234$#@!"   # Secret password to clear the entire chat
 MAX_MESSAGES = 50               # Automatically deletes oldest messages to save RAM
 HEARTBEAT_TIMEOUT = 60          # Seconds before an inactive user is considered offline
 
-# Global CSS Injection to collapse excessive Streamlit component gaps
-st.markdown("""
-    <style>
-    /* Shrink gaps between columns and layout containers */
-    div[data-testid="stHorizontalBlock"] {
-        gap: 6px !important;
-    }
-    .stElementContainer {
-        margin-bottom: 0px !important;
-    }
-    /* Style the tiny reaction badges */
-    div.stButton > button {
-        padding: 0px 6px !important;
-        font-size: 11px !important;
-        min-height: 20px !important;
-        height: 20px !important;
-        border-radius: 12px !important;
-        margin-top: -1000px !important; /* Pulls buttons directly upwards up under the text */
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 # 2. Setup Global/Shared Store using Streamlit's Cache
 @st.cache_resource
 def get_global_data():
@@ -121,17 +99,13 @@ else:
 
     st.title("💬 Real-Time Chat")
     
-    # Display Existing Messages and Reactions
+    # Display Existing Messages
     chat_container = st.container(height=380)
     with chat_container:
         if not global_data["messages"]:
             st.write("_No messages yet. Say hello!_")
         
-        for msg_idx, msg in enumerate(global_data["messages"]):
-            # SAFEGUARD: If this is an old message, add reactions dictionary structure dynamically
-            if "reactions" not in msg:
-                msg["reactions"] = {"👍": [], "❤️": [], "😂": []}
-
+        for msg in global_data["messages"]:
             time_str = msg["time"].strftime("%I:%M %p")
             header = f"**[{time_str}] {msg['emoji']} {msg['user']}:**"
             
@@ -140,42 +114,6 @@ else:
             if msg["image"]:
                 st.write(header)
                 st.image(msg["image"], width=250)
-                
-            # --- SUPER COMPACT REACTION ROW ---
-            current_user = st.session_state.username
-            
-            # Creating micro columns that tightly pack buttons right on the left margin
-            react_cols = st.columns([0.04, 0.04,0.04, 0.99])
-            
-            # Button 1: Thumbs Up
-            t_count = len(msg["reactions"]["👍"])
-            if react_cols[0].button(f"👍{t_count if t_count > 0 else ''}", key=f"t_{msg_idx}"):
-                if current_user in msg["reactions"]["👍"]:
-                    msg["reactions"]["👍"].remove(current_user)
-                else:
-                    msg["reactions"]["👍"].append(current_user)
-                st.rerun()
-                
-            # Button 2: Heart
-            h_count = len(msg["reactions"]["❤️"])
-            if react_cols[1].button(f"❤️{h_count if h_count > 0 else ''}", key=f"h_{msg_idx}"):
-                if current_user in msg["reactions"]["❤️"]:
-                    msg["reactions"]["❤️"].remove(current_user)
-                else:
-                    msg["reactions"]["❤️"].append(current_user)
-                st.rerun()
-                
-            # Button 3: Laughing
-            l_count = len(msg["reactions"]["😂"])
-            if react_cols[2].button(f"😂{l_count if l_count > 0 else ''}", key=f"l_{msg_idx}"):
-                if current_user in msg["reactions"]["😂"]:
-                    msg["reactions"]["😂"].remove(current_user)
-                else:
-                    msg["reactions"]["😂"].append(current_user)
-                st.rerun()
-            
-            # Small structural divider line between individual chat bubbles
-            st.markdown("<div style='margin-bottom: 12px;'></div>", unsafe_allow_html=True)
 
     # Layout with permanent visible prompt labels
     with st.form("message_form", clear_on_submit=True):
@@ -208,8 +146,7 @@ else:
                 "emoji": st.session_state.user_emoji,
                 "text": user_input,
                 "image": compressed_img_bytes,
-                "time": ist_time,
-                "reactions": {"👍": [], "❤️": [], "😂": []}
+                "time": ist_time
             })
             
             if len(global_data["messages"]) > MAX_MESSAGES:
