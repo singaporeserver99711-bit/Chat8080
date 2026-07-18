@@ -27,7 +27,7 @@ st.markdown("""
         min-height: 20px !important;
         height: 20px !important;
         border-radius: 12px !important;
-        margin-top: -25px !important; /* Pulls buttons directly upwards up under the text */
+        margin-top: -30px !important; /* Pulls buttons directly upwards up under the text */
     }
     </style>
 """, unsafe_allow_html=True)
