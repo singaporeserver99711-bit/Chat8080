@@ -40,7 +40,7 @@ if "user_emoji" not in st.session_state:
 # Always clean up dead sessions first
 cleanup_inactive_users()
 
-# FIXED: Reliable check for the secret admin backdoor (?admin=true)
+# Check for the secret admin backdoor (?admin=true)
 query_params = st.query_params.to_dict()
 is_admin_mode = query_params.get("admin") == "true"
 
@@ -53,7 +53,6 @@ if not st.session_state.username:
         ["👤", "🙍‍♂️", "🙎‍♀️", "🧑‍🦰", "🤖", "👱", "🥷", "🧙", "💫", "💀", "🚀", "⚡"]
     )
     
-    # IMPROVED: Direct placeholder request
     username_input = st.text_input("Username:", placeholder="Enter your nickname to join...")
     
     if st.button("Join Chat"):
@@ -100,7 +99,7 @@ else:
 
     st.title("💬 Real-Time Chat")
     
-        # Display Existing Messages and Reactions
+    # Display Existing Messages and Reactions
     chat_container = st.container(height=380)
     with chat_container:
         if not global_data["messages"]:
@@ -139,7 +138,7 @@ else:
                 </style>
             """, unsafe_allowed_code=True)
             
-            # We create a tight row of 10 tiny micro-columns so they cluster tightly on the left
+            # We create a tight row of columns so they cluster tightly on the left under the avatar text
             react_cols = st.columns([0.4, 0.4, 0.4, 6])
             
             # Button 1: Thumbs Up
@@ -171,7 +170,7 @@ else:
                 
             st.write("") # Clean separation spacing between entries
 
-    # Re-arranged Layout with permanent visible prompt labels
+    # Layout with permanent visible prompt labels
     with st.form("message_form", clear_on_submit=True):
         col_upload, col_input, col_send = st.columns([1.5, 4, 1])
         
@@ -203,7 +202,7 @@ else:
                 "text": user_input,
                 "image": compressed_img_bytes,
                 "time": ist_time,
-                "reactions": {"👍": [], "❤️": [], "😂": []} # Inits structural empty state dict trackers
+                "reactions": {"👍": [], "❤️": [], "😂": []}
             })
             
             if len(global_data["messages"]) > MAX_MESSAGES:
