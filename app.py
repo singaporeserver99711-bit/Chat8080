@@ -100,6 +100,7 @@ else:
 
     st.title("💬 Real-Time Chat")
     
+        # Display Existing Messages and Reactions
     chat_container = st.container(height=380)
     with chat_container:
         if not global_data["messages"]:
@@ -107,6 +108,10 @@ else:
         
         # Loop through messages with their numerical index to generate distinct reaction button IDs
         for msg_idx, msg in enumerate(global_data["messages"]):
+            # SAFEGUARD: If this is an old message from before the update, give it empty reactions dynamically!
+            if "reactions" not in msg:
+                msg["reactions"] = {"👍": [], "❤️": [], "😂": []}
+
             time_str = msg["time"].strftime("%I:%M %p")
             header = f"**[{time_str}] {msg['emoji']} {msg['user']}:**"
             
@@ -116,13 +121,30 @@ else:
                 st.write(header)
                 st.image(msg["image"], width=250)
                 
-            # --- INTERACTIVE REACTION BUTTON ROW ---
+            # --- COMPACT REACTION ROW (Custom Styled) ---
             current_user = st.session_state.username
-            react_cols = st.columns([1, 1, 1, 7])
+            
+            # This CSS forces the buttons to sit tightly together instead of spreading out
+            st.markdown("""
+                <style>
+                div[data-testid="stHorizontalBlock"] {
+                    gap: 5px !important;
+                }
+                div.stButton > button {
+                    padding: 2px 8px !important;
+                    font-size: 12px !important;
+                    min-height: 25px !important;
+                    height: 25px !important;
+                }
+                </style>
+            """, unsafe_allowed_code=True)
+            
+            # We create a tight row of 10 tiny micro-columns so they cluster tightly on the left
+            react_cols = st.columns([0.4, 0.4, 0.4, 6])
             
             # Button 1: Thumbs Up
             t_count = len(msg["reactions"]["👍"])
-            if react_cols[0].button(f"👍 {t_count if t_count > 0 else ''}", key=f"t_{msg_idx}"):
+            if react_cols[0].button(f"👍{t_count if t_count > 0 else ''}", key=f"t_{msg_idx}"):
                 if current_user in msg["reactions"]["👍"]:
                     msg["reactions"]["👍"].remove(current_user)
                 else:
@@ -131,7 +153,7 @@ else:
                 
             # Button 2: Heart
             h_count = len(msg["reactions"]["❤️"])
-            if react_cols[1].button(f"❤️ {h_count if h_count > 0 else ''}", key=f"h_{msg_idx}"):
+            if react_cols[1].button(f"❤️{h_count if h_count > 0 else ''}", key=f"h_{msg_idx}"):
                 if current_user in msg["reactions"]["❤️"]:
                     msg["reactions"]["❤️"].remove(current_user)
                 else:
@@ -140,7 +162,7 @@ else:
                 
             # Button 3: Laughing
             l_count = len(msg["reactions"]["😂"])
-            if react_cols[2].button(f"😂 {l_count if l_count > 0 else ''}", key=f"l_{msg_idx}"):
+            if react_cols[2].button(f"😂{l_count if l_count > 0 else ''}", key=f"l_{msg_idx}"):
                 if current_user in msg["reactions"]["😂"]:
                     msg["reactions"]["😂"].remove(current_user)
                 else:
