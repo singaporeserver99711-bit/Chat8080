@@ -123,7 +123,7 @@ else:
             # --- COMPACT REACTION ROW (Custom Styled) ---
             current_user = st.session_state.username
             
-            # This CSS forces the buttons to sit tightly together instead of spreading out
+                        # This CSS forces the buttons to sit tightly together instead of spreading out
             st.markdown("""
                 <style>
                 div[data-testid="stHorizontalBlock"] {
@@ -136,7 +136,8 @@ else:
                     height: 25px !important;
                 }
                 </style>
-            """, unsafe_allowed_code=True)
+            """, unsafe_allow_html=True)  # <-- FIXED THIS PARAMETER NAME HERE
+
             
             # We create a tight row of columns so they cluster tightly on the left under the avatar text
             react_cols = st.columns([0.4, 0.4, 0.4, 6])
