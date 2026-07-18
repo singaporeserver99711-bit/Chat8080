@@ -40,26 +40,27 @@ if "user_emoji" not in st.session_state:
 # Always clean up dead sessions first
 cleanup_inactive_users()
 
-# Check for the secret admin back-door in the URL query parameters
-# Access via: your-app.streamlit.app/?admin=true
-is_admin_mode = st.query_params.get("admin") == "true"
+# FIXED: Reliable check for the secret admin backdoor (?admin=true)
+query_params = st.query_params.to_dict()
+is_admin_mode = query_params.get("admin") == "true"
 
 # --- SCREEN 1: NICKNAME & PROFILE EMOJI SETUP ---
 if not st.session_state.username:
     st.title("💬 Welcome to the Chatroom!")
     st.write("Set up your profile to join the conversation instantly.")
     
-    # Let them pick a cool avatar emoji
     emoji_choice = st.selectbox("Choose your profile avatar:", 
-        ["👤", "🙍‍♂️", "🙎‍♀️", "🧑‍🦰", "🤖", "👱", "🥷", "🧙", "💫", "😎", "🚀", "⚡"]
+        ["👤", "🙍‍♂️", "🙎‍♀️", "🧑‍🦰", "🤖", "👱", "🥷", "🧙", "💫", "💀", "🚀", "⚡"]
     )
-    username_input = st.text_input("Enter your nickname to join:")
+    
+    # IMPROVED: Direct placeholder request
+    username_input = st.text_input("Username:", placeholder="Enter your nickname to join...")
     
     if st.button("Join Chat"):
         username_clean = username_input.strip()
         if username_clean:
             if username_clean in global_data["active_users"]:
-                st.error("This nickname is already in use! Try another one, or wait 1 minute if you recently closed your tab.")
+                st.error("This nickname is already in use! Try another one.")
             else:
                 st.session_state.username = username_clean
                 st.session_state.user_emoji = emoji_choice
@@ -68,10 +69,8 @@ if not st.session_state.username:
 
 # --- SCREEN 2: THE CHATROOM ---
 else:
-    # Update active user's heartbeat
     global_data["active_users"][st.session_state.username] = datetime.datetime.now(datetime.timezone.utc)
 
-    # Sidebar showing active users and actions
     with st.sidebar:
         st.title("👥 Chat Lounge")
         st.write(f"Logged in as: **{st.session_state.user_emoji} {st.session_state.username}**")
@@ -86,7 +85,7 @@ else:
             st.session_state.username = ""
             st.rerun()
             
-        # SECRET ADMIN INTERFACE - ONLY appears if "?admin=true" is in the browser URL!
+        # SECRET ADMIN INTERFACE - Triggered via URL parameter
         if is_admin_mode:
             st.write("---")
             st.subheader("🛠️ Secret Admin Panel")
@@ -99,10 +98,8 @@ else:
                 else:
                     st.error("Invalid Admin Pass!")
 
-    # Main Chat Interface
     st.title("💬 Real-Time Chat")
     
-    # Display Existing Messages
     chat_container = st.container(height=380)
     with chat_container:
         if not global_data["messages"]:
@@ -113,20 +110,21 @@ else:
             
             if msg["text"]:
                 st.markdown(f"{header} {msg['text']}")
-            
             if msg["image"]:
                 st.write(header)
                 st.image(msg["image"], width=250)
 
-    # Re-arranged Layout: Upload on the far left, input in middle, send button on right
+    # Re-arranged Layout with permanent visible prompt labels
     with st.form("message_form", clear_on_submit=True):
-        col_upload, col_input, col_send = st.columns([1.2, 4, 1])
+        col_upload, col_input, col_send = st.columns([1.5, 4, 1])
         
         with col_upload:
-            uploaded_file = st.file_uploader("📷 Pic", type=["jpg", "png", "jpeg"], label_visibility="collapsed")
+            uploaded_file = st.file_uploader("📷 Attach Image", type=["jpg", "png", "jpeg"])
         with col_input:
-            user_input = st.text_input("Type your message here...", label_visibility="collapsed")
+            user_input = st.text_input("Message:", placeholder="Type your messages...")
         with col_send:
+            st.write("") # Adjust spacing
+            st.write("") 
             submit_btn = st.form_submit_button("Send 🚀", use_container_width=True)
 
     if submit_btn:
@@ -157,3 +155,4 @@ else:
 
     if st.button("🔄 Refresh Messages"):
         st.rerun()
+
