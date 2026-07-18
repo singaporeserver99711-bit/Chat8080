@@ -27,7 +27,7 @@ st.markdown("""
         min-height: 20px !important;
         height: 20px !important;
         border-radius: 12px !important;
-        margin-top: -8px !important; /* Pulls buttons directly upwards up under the text */
+        margin-top: -14px !important; /* Pulls buttons directly upwards up under the text */
     }
     </style>
 """, unsafe_allow_html=True)
@@ -145,7 +145,7 @@ else:
             current_user = st.session_state.username
             
             # Creating micro columns that tightly pack buttons right on the left margin
-            react_cols = st.columns([0.06, 0.06, 0.06, 0.82])
+            react_cols = st.columns([0.04, 0.04, 0.04, 0.88])
             
             # Button 1: Thumbs Up
             t_count = len(msg["reactions"]["👍"])
